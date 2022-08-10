@@ -1,4 +1,4 @@
-# Agenda: Creating bullets for shooting   <<<<<<<<<< ====================
+# Agenda: Firing multiple bullets (one at a time) for shooting   <<<<<<<<<< ====================
 
 import pygame
 import random
@@ -24,7 +24,7 @@ playerX = 370
 playerY = 480
 playerX_change = 0
 
-# Bullet    <<<<<<<<<< ====================
+# Bullet
 # Ready - You can't see the bullet on the screen
 # Fire - The bullet is currently moving
 
@@ -46,7 +46,7 @@ enemyY_change = 40
 def player(x, y):
     screen.blit(playerImg, (x, y))
 
-# Fire the bullet    <<<<<<<<<< ====================
+# Fire the bullet
 def fire_bullet(x, y):
     global bullet_state
     bullet_state = "fire"
@@ -103,6 +103,11 @@ while running:
     elif enemyX >= 736:  # 800px - 64px (64px is width of pic)
         enemyX_change = -0.3
         enemyY += enemyY_change
+
+    # Change bullet state to Y 480 again if goes beyond 0     <<<<<<<<<< ====================
+    if bulletY < 0:
+        bulletY = 480
+        bullet_state = "ready"
 
     # Bullet Movement
     if bullet_state is "fire":

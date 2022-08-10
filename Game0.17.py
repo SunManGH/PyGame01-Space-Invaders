@@ -1,4 +1,7 @@
-# Agenda: Creating bullets for shooting   <<<<<<<<<< ====================
+# Agenda: Collision detection   
+#   <<<<<<<<<< ====================
+
+import math #   <<<<<<<<<< ====================
 
 import pygame
 import random
@@ -24,7 +27,7 @@ playerX = 370
 playerY = 480
 playerX_change = 0
 
-# Bullet    <<<<<<<<<< ====================
+# Bullet
 # Ready - You can't see the bullet on the screen
 # Fire - The bullet is currently moving
 
@@ -36,6 +39,10 @@ bulletX_change = 0  # no need to go left or right
 bulletY_change = 1 # bullet is be fired up and it goes up by 1 pixels in one loop
 bullet_state = "ready"
 
+# Score    <<<<<<<<<< ====================
+score_value = 0
+
+
 # Enemy
 enemyImg = pygame.image.load('enemy.png')
 enemyX = random.randint(0,800)
@@ -46,7 +53,7 @@ enemyY_change = 40
 def player(x, y):
     screen.blit(playerImg, (x, y))
 
-# Fire the bullet    <<<<<<<<<< ====================
+# Fire the bullet
 def fire_bullet(x, y):
     global bullet_state
     bullet_state = "fire"
@@ -56,6 +63,14 @@ def fire_bullet(x, y):
 # Enemy
 def enemy(x, y):
     screen.blit(enemyImg, (x, y))
+
+# Collision detection (based on distance between two coordinates)    <<<<<<<<<< ====================
+def isCollision(enemyX, enemyY, bulletX, bulletY):
+    distance = math.sqrt(math.pow(enemyX - bulletX, 2) + (math.pow(enemyY - bulletY, 2)))
+    if distance < 27:
+        return True
+    else:
+        return False
 
 # Game Loop
 running = True
@@ -78,8 +93,10 @@ while running:
             if event.key == pygame.K_RIGHT:
                 playerX_change = 0.3
             if event.key == pygame.K_SPACE:
-                fire_bullet(playerX,bulletY)
-
+                if bullet_state is "ready":
+                    bulletX = playerX
+                    fire_bullet(bulletX,bulletY)
+                    
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 playerX_change = 0
@@ -104,9 +121,24 @@ while running:
         enemyX_change = -0.3
         enemyY += enemyY_change
 
+    # Collision    <<<<<<<<<< ====================
+    collision = isCollision(enemyX, enemyY, bulletX, bulletY)
+    if collision:
+        bulletY = 480
+        bullet_state = "ready"
+        score_value += 1
+        print(score_value)
+        enemyX = random.randint(0, 736)
+        enemyY = random.randint(50, 150)
+    
+    # Change bullet state to Y 480 again if goes beyond 0
+    if bulletY < 0:
+        bulletY = 480
+        bullet_state = "ready"
+
     # Bullet Movement
     if bullet_state is "fire":
-        fire_bullet(playerX,bulletY)
+        fire_bullet(bulletX,bulletY)
         bulletY -= bulletY_change
 
     # Draw the player
@@ -121,6 +153,6 @@ while running:
 
 """
 Two issues observed
-1- Only one bullet can be fired
-2- bullet moves with player after fired
+1- Only one bullet can be fired at a time
+2- Collision not detected
 """

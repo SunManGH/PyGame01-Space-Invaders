@@ -1,4 +1,7 @@
-# Agenda: Creating bullets for shooting   <<<<<<<<<< ====================
+# Agenda: Creating multiple enemies
+#   <<<<<<<<<< ====================
+
+import math
 
 import pygame
 import random
@@ -24,7 +27,7 @@ playerX = 370
 playerY = 480
 playerX_change = 0
 
-# Bullet    <<<<<<<<<< ====================
+# Bullet
 # Ready - You can't see the bullet on the screen
 # Fire - The bullet is currently moving
 
@@ -36,26 +39,45 @@ bulletX_change = 0  # no need to go left or right
 bulletY_change = 1 # bullet is be fired up and it goes up by 1 pixels in one loop
 bullet_state = "ready"
 
-# Enemy
-enemyImg = pygame.image.load('enemy.png')
-enemyX = random.randint(0,800)
-enemyY = random.randint(50,150)
-enemyX_change = 0.3
-enemyY_change = 40
+# Score
+score_value = 0
+
+# Enemy #   <<<<<<<<<< ====================
+enemyImg = []
+enemyX = []
+enemyY = []
+enemyX_change = []
+enemyY_change = []
+num_of_enemies = 6
+
+for i in range(num_of_enemies):
+    enemyImg.append(pygame.image.load('enemy.png'))
+    enemyX.append(random.randint(0, 736))
+    enemyY.append(random.randint(50, 150))
+    enemyX_change.append(0.3)
+    enemyY_change.append(40)
 
 def player(x, y):
     screen.blit(playerImg, (x, y))
 
-# Fire the bullet    <<<<<<<<<< ====================
+# Fire the bullet
 def fire_bullet(x, y):
     global bullet_state
     bullet_state = "fire"
     # screen.blit(alphaBulletImg, (x, y))
     screen.blit(alphaBulletImg, (x+16, y+10)) # to hide the bullet behind player
 
-# Enemy
-def enemy(x, y):
-    screen.blit(enemyImg, (x, y))
+# Enemy    <<<<<<<<<< ====================
+def enemy(x, y, i):
+    screen.blit(enemyImg[i], (x, y))
+
+# Collision detection
+def isCollision(enemyX, enemyY, bulletX, bulletY):
+    distance = math.sqrt(math.pow(enemyX - bulletX, 2) + (math.pow(enemyY - bulletY, 2)))
+    if distance < 27:
+        return True
+    else:
+        return False
 
 # Game Loop
 running = True
@@ -78,8 +100,10 @@ while running:
             if event.key == pygame.K_RIGHT:
                 playerX_change = 0.3
             if event.key == pygame.K_SPACE:
-                fire_bullet(playerX,bulletY)
-
+                if bullet_state is "ready":
+                    bulletX = playerX
+                    fire_bullet(bulletX,bulletY)
+                    
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 playerX_change = 0
@@ -93,34 +117,45 @@ while running:
     elif playerX >= 736:  # 800px - 64px (64px is width of pic)
         playerX = 736
 
-    # Change position of the enemy
-    enemyX += enemyX_change    
+    # Enemy Movement    <<<<<<<<<< ====================
+    for i in range(num_of_enemies):
+        # Change position of the enemy
+        enemyX[i] += enemyX_change[i]
 
-    # Enemy Movement
-    if enemyX <= 0:
-        enemyX_change = 0.3
-        enemyY += enemyY_change
-    elif enemyX >= 736:  # 800px - 64px (64px is width of pic)
-        enemyX_change = -0.3
-        enemyY += enemyY_change
+        # Enemy Movement
+        if enemyX[i] <= 0:
+            enemyX_change[i] = 0.3
+            enemyY[i] += enemyY_change[i]
+        elif enemyX[i] >= 736:
+            enemyX_change[i] = -0.3
+            enemyY[i] += enemyY_change[i]
+
+        # Collision    <<<<<<<<<< ====================
+        collision = isCollision(enemyX[i], enemyY[i], bulletX, bulletY)
+        if collision:
+            bulletY = 480
+            bullet_state = "ready"
+            score_value += 1
+            print(score_value)
+            enemyX[i] = random.randint(0, 736)
+            enemyY[i] = random.randint(50, 150)
+
+        # Draw the enemy    <<<<<<<<<< ====================
+        enemy(enemyX[i], enemyY[i], i)
+
+    # Change bullet state to Y 480 again if goes beyond 0
+    if bulletY < 0:
+        bulletY = 480
+        bullet_state = "ready"
 
     # Bullet Movement
     if bullet_state is "fire":
-        fire_bullet(playerX,bulletY)
+        fire_bullet(bulletX,bulletY)
         bulletY -= bulletY_change
 
     # Draw the player
     player(playerX, playerY)
 
-    # Draw the enemy
-    enemy(enemyX, enemyY)
-
     # update the screen
     pygame.display.update()
 
-
-"""
-Two issues observed
-1- Only one bullet can be fired
-2- bullet moves with player after fired
-"""

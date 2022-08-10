@@ -1,4 +1,4 @@
-# Agenda: Creating bullets for shooting   <<<<<<<<<< ====================
+# Agenda: Bullet should follow up direction and shouldn't change with player's movement   <<<<<<<<<< ====================
 
 import pygame
 import random
@@ -24,7 +24,7 @@ playerX = 370
 playerY = 480
 playerX_change = 0
 
-# Bullet    <<<<<<<<<< ====================
+# Bullet
 # Ready - You can't see the bullet on the screen
 # Fire - The bullet is currently moving
 
@@ -46,7 +46,7 @@ enemyY_change = 40
 def player(x, y):
     screen.blit(playerImg, (x, y))
 
-# Fire the bullet    <<<<<<<<<< ====================
+# Fire the bullet
 def fire_bullet(x, y):
     global bullet_state
     bullet_state = "fire"
@@ -78,8 +78,10 @@ while running:
             if event.key == pygame.K_RIGHT:
                 playerX_change = 0.3
             if event.key == pygame.K_SPACE:
-                fire_bullet(playerX,bulletY)
-
+                if bullet_state is "ready":  #     <<<<<<<<<< ====================
+                    bulletX = playerX
+                    fire_bullet(bulletX,bulletY)
+                    
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 playerX_change = 0
@@ -104,9 +106,14 @@ while running:
         enemyX_change = -0.3
         enemyY += enemyY_change
 
+    # Change bullet state to Y 480 again if goes beyond 0
+    if bulletY < 0:
+        bulletY = 480
+        bullet_state = "ready"
+
     # Bullet Movement
     if bullet_state is "fire":
-        fire_bullet(playerX,bulletY)
+        fire_bullet(bulletX,bulletY)
         bulletY -= bulletY_change
 
     # Draw the player
@@ -121,6 +128,6 @@ while running:
 
 """
 Two issues observed
-1- Only one bullet can be fired
-2- bullet moves with player after fired
+1- Only one bullet can be fired at a time
+2- Collision not detected
 """
